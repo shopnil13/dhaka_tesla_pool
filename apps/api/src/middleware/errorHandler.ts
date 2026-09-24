@@ -1,5 +1,6 @@
 import type { ApiErrorBody } from '@teslapool/shared';
 import type { ErrorRequestHandler, RequestHandler } from 'express';
+import { z, ZodError } from 'zod';
 import { AppError, NotFoundError } from '../lib/errors';
 
 export const notFoundHandler: RequestHandler = (req, _res, next) => {
@@ -26,6 +27,17 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof AppError) {
     status = err.status;
     body = { error: { code: err.code, message: err.message, details: err.details, requestId } };
+  } else if (err instanceof ZodError) {
+    // { formErrors, fieldErrors } maps straight onto form fields in the web app.
+    status = 400;
+    body = {
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: 'Some fields are invalid',
+        details: z.flattenError(err),
+        requestId,
+      },
+    };
   } else if (isClientHttpError(err)) {
     status = err.status;
     body = { error: { code: 'VALIDATION_FAILED', message: err.message, requestId } };
