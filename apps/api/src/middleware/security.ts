@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { rateLimit } from 'express-rate-limit';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { env } from '../config/env';
 import { AppError } from '../lib/errors';
 
@@ -24,13 +24,25 @@ export const requireJsonBody: RequestHandler = (req, _res, next) => {
 /**
  * Slows down password guessing and sign-up spam. One limiter per app
  * instance (in memory); several API instances would need a shared store.
+ *
+ * - by: 'account' keys on the email being signed into. That is what stops
+ *   brute-forcing a password, and it still works behind a proxy that does not
+ *   forward the client IP (Next.js rewrites do not send X-Forwarded-For).
+ * - by: 'ip' keys on the client IP (sign-up spam).
  */
-export const createAuthRateLimit = () =>
+export const createAuthRateLimit = ({ by }: { by: 'account' | 'ip' }) =>
   rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: env.AUTH_RATE_LIMIT,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
+    keyGenerator: (req) => {
+      const email: unknown = req.body?.email;
+      if (by === 'account' && typeof email === 'string') {
+        return `account:${email.trim().toLowerCase()}`;
+      }
+      return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
+    },
     handler: (_req, _res, next) => {
       next(
         new AppError(
