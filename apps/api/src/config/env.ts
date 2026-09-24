@@ -5,6 +5,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_EXPIRES_IN_HOURS: z.coerce.number().int().positive().default(12),
+  // true in production (HTTPS only); false locally where the app runs on plain http.
+  COOKIE_SECURE: z.stringbool().default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -1,9 +1,11 @@
-import type { AuthUser, RegisterInput } from '@teslapool/shared';
+import { randomUUID } from 'node:crypto';
+import type { AuthUser, LoginInput, RegisterInput } from '@teslapool/shared';
+import { eq } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { users, walletAccounts } from '../../db/schema';
 import { isUniqueViolation } from '../../lib/dbErrors';
 import { AppError } from '../../lib/errors';
-import { hashPassword } from '../../lib/password';
+import { hashPassword, verifyPassword } from '../../lib/password';
 
 type UserRow = typeof users.$inferSelect;
 
@@ -38,4 +40,28 @@ export async function registerPassenger(input: RegisterInput): Promise<AuthUser>
     }
     throw err;
   }
+}
+
+// Compared against when the email is unknown, so "no such user" costs the
+// same bcrypt time as "wrong password" and timing does not reveal accounts.
+let dummyHash: Promise<string> | undefined;
+
+export async function login(input: LoginInput): Promise<AuthUser> {
+  const [user] = await db.select().from(users).where(eq(users.email, input.email));
+  const passwordOk = await verifyPassword(
+    input.password,
+    user?.passwordHash ?? (await (dummyHash ??= hashPassword(randomUUID()))),
+  );
+  if (!user || !passwordOk) {
+    // Same answer for both cases: never confirm whether an email is registered.
+    throw new AppError(401, 'INVALID_CREDENTIALS', 'Wrong email or password');
+  }
+  return toAuthUser(user);
+}
+
+/** Re-reads the user so /me reflects the database, not just the token. */
+export async function getUser(userId: string): Promise<AuthUser> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user) throw new AppError(401, 'UNAUTHENTICATED', 'Please sign in to continue');
+  return toAuthUser(user);
 }

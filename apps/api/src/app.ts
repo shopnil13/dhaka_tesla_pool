@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -12,6 +13,7 @@ export function createApp() {
   app.use(requestLogger);
   app.use(helmet());
   app.use(express.json({ limit: '100kb' }));
+  app.use(cookieParser());
 
   app.use('/api/v1', healthRouter);
   app.use('/api/v1', authRouter);

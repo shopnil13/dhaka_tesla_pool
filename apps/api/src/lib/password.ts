@@ -4,3 +4,5 @@ import bcrypt from 'bcryptjs';
 const BCRYPT_COST = 10;
 
 export const hashPassword = (plain: string) => bcrypt.hash(plain, BCRYPT_COST);
+
+export const verifyPassword = (plain: string, hash: string) => bcrypt.compare(plain, hash);

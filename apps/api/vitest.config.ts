@@ -13,6 +13,8 @@ export default defineConfig({
       LOG_LEVEL: 'silent',
       // Tests always run against the throwaway test database, never DATABASE_URL.
       DATABASE_URL: TEST_DATABASE_URL,
+      JWT_SECRET: 'test-only-secret-that-is-at-least-32-chars',
+      COOKIE_SECURE: 'false',
     },
   },
 });
