@@ -1,15 +1,29 @@
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app';
+import { pgPool } from '../src/db/client';
 
 const app = createApp();
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('GET /api/v1/health', () => {
-  it('reports that the API is up', async () => {
+  it('reports that the API and database are up', async () => {
     const res = await request(app).get('/api/v1/health');
 
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe('ok');
+    expect(res.body).toMatchObject({ status: 'ok', db: 'up' });
+  });
+
+  it('returns 503 when the database is unreachable, so orchestrators stop routing to it', async () => {
+    vi.spyOn(pgPool, 'query').mockRejectedValueOnce(new Error('connect ECONNREFUSED') as never);
+
+    const res = await request(app).get('/api/v1/health');
+
+    expect(res.status).toBe(503);
+    expect(res.body).toMatchObject({ status: 'degraded', db: 'down' });
   });
 
   it('reuses a safe incoming request id and echoes it back', async () => {
