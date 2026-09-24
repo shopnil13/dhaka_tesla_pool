@@ -1,0 +1,13 @@
+{
+  "name": "@teslapool/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Types, schemas and constants shared by the API and the web app.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
