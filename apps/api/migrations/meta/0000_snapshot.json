@@ -1,0 +1,151 @@
+{
+  "id": "35e2f895-a4ac-48c2-83ab-38b499ac9592",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.zone_distances": {
+      "name": "zone_distances",
+      "schema": "",
+      "columns": {
+        "from_zone_id": {
+          "name": "from_zone_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "to_zone_id": {
+          "name": "to_zone_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance_m": {
+          "name": "distance_m",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "zone_distances_from_zone_id_zones_id_fk": {
+          "name": "zone_distances_from_zone_id_zones_id_fk",
+          "tableFrom": "zone_distances",
+          "tableTo": "zones",
+          "columnsFrom": [
+            "from_zone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "zone_distances_to_zone_id_zones_id_fk": {
+          "name": "zone_distances_to_zone_id_zones_id_fk",
+          "tableFrom": "zone_distances",
+          "tableTo": "zones",
+          "columnsFrom": [
+            "to_zone_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "zone_distances_from_zone_id_to_zone_id_pk": {
+          "name": "zone_distances_from_zone_id_to_zone_id_pk",
+          "columns": [
+            "from_zone_id",
+            "to_zone_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "zone_distances_distinct_zones": {
+          "name": "zone_distances_distinct_zones",
+          "value": "\"zone_distances\".\"from_zone_id\" <> \"zone_distances\".\"to_zone_id\""
+        },
+        "zone_distances_positive": {
+          "name": "zone_distances_positive",
+          "value": "\"zone_distances\".\"distance_m\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.zones": {
+      "name": "zones",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "zones_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "32767",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "zones_slug_unique": {
+          "name": "zones_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        },
+        "zones_name_unique": {
+          "name": "zones_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
