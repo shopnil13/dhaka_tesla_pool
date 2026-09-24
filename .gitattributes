@@ -1,0 +1,8 @@
+# Normalise line endings to LF so scripts run inside Linux containers
+# even when the repo is checked out on Windows.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
