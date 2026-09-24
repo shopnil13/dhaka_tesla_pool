@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790267271634,
+      "tag": "0000_zones_and_distances",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790267346351,
+      "tag": "0001_users_drivers_vehicles",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790267431570,
+      "tag": "0002_rides_pools_memberships",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790267537325,
+      "tag": "0003_events_payments_wallet_ratings",
+      "breakpoints": true
+    }
+  ]
+}
