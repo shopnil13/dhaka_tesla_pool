@@ -6,6 +6,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { requireJsonBody } from './middleware/security';
 import { createAuthRouter } from './modules/auth/auth.routes';
+import { driverRouter } from './modules/driver/driver.routes';
 import { faresRouter } from './modules/fares/fares.routes';
 import { ridesRouter } from './modules/rides/rides.routes';
 import { zonesRouter } from './modules/zones/zones.routes';
@@ -29,6 +30,7 @@ export function createApp() {
   app.use('/api/v1', zonesRouter);
   app.use('/api/v1', faresRouter);
   app.use('/api/v1', ridesRouter);
+  app.use('/api/v1', driverRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
