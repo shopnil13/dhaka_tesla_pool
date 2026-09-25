@@ -49,3 +49,27 @@ export async function chargeRide(tx: Tx, ride: RideRow) {
 
   return { farePoisha: fare!.amountPoisha, duesPoisha, method: ride.paymentMethod };
 }
+
+/**
+ * Late-cancellation fee. TeslaPay pays it now: the request-time check made the
+ * balance cover the quote, and the fee (৳30) is below any possible fare.
+ * Cash cannot be collected from someone who is not getting in, so it becomes a
+ * DUE that is collected together with their next ride's fare.
+ */
+export async function chargeCancellationFee(tx: Tx, ride: RideRow, feePoisha: number) {
+  const teslaPay = ride.paymentMethod === 'TESLAPAY';
+  const [fee] = await tx
+    .insert(payments)
+    .values({
+      passengerId: ride.passengerId,
+      rideRequestId: ride.id,
+      purpose: 'CANCELLATION_FEE',
+      method: ride.paymentMethod,
+      amountPoisha: feePoisha,
+      status: teslaPay ? 'PAID' : 'DUE',
+      paidAt: teslaPay ? new Date() : null,
+    })
+    .returning();
+  if (teslaPay) await debitWallet(tx, ride.passengerId, feePoisha, fee!.id);
+  return { feePoisha, status: fee!.status };
+}

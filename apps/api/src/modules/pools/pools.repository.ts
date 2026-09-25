@@ -2,8 +2,14 @@ import type { ActorRole } from '@teslapool/shared';
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type { Tx } from '../../db/client';
 import { poolMemberships, pools, rideRequests } from '../../db/schema';
-import type { JoinCandidate, PlannedRoute, PoolRider } from '../../domain/matching';
-import { assertRideTransition } from '../../domain/stateMachine';
+import {
+  planRoute,
+  type DistanceLookup,
+  type JoinCandidate,
+  type PlannedRoute,
+  type PoolRider,
+} from '../../domain/matching';
+import { assertPoolTransition, assertRideTransition } from '../../domain/stateMachine';
 import { NotFoundError } from '../../lib/errors';
 import { recordEvent } from '../../lib/events';
 
@@ -134,6 +140,48 @@ export async function joinPool(tx: Tx, input: JoinPoolInput) {
     reason: input.reason,
     metadata: { poolId: pool.id, seatsTaken: updated!.seatsTaken, capacity: pool.capacity },
   });
+}
+
+/**
+ * A passenger leaves a pool before it starts (they cancelled). Caller holds
+ * the pool and ride locks. The seat is released and everyone else's stop
+ * order is re-planned; if nobody is left, the pool is cancelled so the driver
+ * is free to accept someone else.
+ */
+export async function leavePool(
+  tx: Tx,
+  { pool, ride, distance }: { pool: PoolRow; ride: RideRow; distance: DistanceLookup },
+) {
+  const now = new Date();
+  await tx
+    .update(poolMemberships)
+    .set({ leftAt: now, leftReason: 'PASSENGER_CANCELLED' })
+    .where(and(eq(poolMemberships.rideRequestId, ride.id), isNull(poolMemberships.leftAt)));
+  await tx
+    .update(pools)
+    .set({ seatsTaken: sql`${pools.seatsTaken} - ${ride.seats}` })
+    .where(eq(pools.id, pool.id));
+
+  const remaining = await activeMembers(tx, pool.id);
+  if (remaining.length > 0) {
+    await saveDropoffOrder(tx, pool.id, planRoute(pool.pickupZoneId, remaining, distance));
+    return { poolCancelled: false };
+  }
+
+  assertPoolTransition(pool.status, 'CANCELLED');
+  await tx
+    .update(pools)
+    .set({ status: 'CANCELLED', cancelledAt: now })
+    .where(eq(pools.id, pool.id));
+  await recordEvent(tx, {
+    poolId: pool.id,
+    from: pool.status,
+    to: 'CANCELLED',
+    actorId: null,
+    actorRole: 'SYSTEM',
+    reason: 'Every passenger cancelled',
+  });
+  return { poolCancelled: true };
 }
 
 /** Stores each member's stop number from the planned route (1 = first drop-off). */
