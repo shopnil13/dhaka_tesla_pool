@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { LoadError } from '@/components/load-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -87,14 +87,7 @@ export function AppShell({ children, nav = [] }: { children: ReactNode; nav?: Na
             <Skeleton className="h-32 w-full" />
           </div>
         ) : me.error ? (
-          <Alert variant="destructive">
-            <AlertDescription className="flex items-center justify-between gap-4">
-              {me.error.message}
-              <Button variant="outline" size="sm" onClick={() => me.refetch()}>
-                Try again
-              </Button>
-            </AlertDescription>
-          </Alert>
+          <LoadError message={me.error.message} onRetry={() => me.refetch()} />
         ) : (
           children
         )}

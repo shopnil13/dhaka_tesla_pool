@@ -1,7 +1,6 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useActiveRide } from '@/lib/rides';
 import { ActiveRideCard } from './active-ride-card';
@@ -13,16 +12,7 @@ export function PassengerRideHome() {
 
   if (active.isPending) return <Skeleton className="h-96 w-full" />;
   if (active.error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription className="flex items-center justify-between gap-4">
-          {active.error.message}
-          <Button variant="outline" size="sm" onClick={() => active.refetch()}>
-            Try again
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
+    return <LoadError message={active.error.message} onRetry={() => active.refetch()} />;
   }
   return active.data ? <ActiveRideCard ride={active.data} /> : <RequestRideForm />;
 }

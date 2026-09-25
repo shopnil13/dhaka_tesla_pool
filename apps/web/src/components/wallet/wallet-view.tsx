@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadError } from '@/components/load-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,16 +16,7 @@ export function WalletView() {
   const topUp = useTopUp();
 
   if (wallet.error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription className="flex items-center justify-between gap-4">
-          {wallet.error.message}
-          <Button variant="outline" size="sm" onClick={() => wallet.refetch()}>
-            Try again
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
+    return <LoadError message={wallet.error.message} onRetry={() => wallet.refetch()} />;
   }
   if (!wallet.data) return <Skeleton className="h-96 w-full" />;
   const { balancePoisha, duesPoisha, transactions } = wallet.data;
