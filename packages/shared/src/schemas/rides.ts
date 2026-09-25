@@ -28,6 +28,25 @@ export const rideRequestSchema = tripSchema.and(
 );
 export type RideRequestInput = z.infer<typeof rideRequestSchema>;
 
+/** A passenger's rating of their driver, once, after being dropped off. */
+export const rateRideSchema = z.object({
+  stars: z.number().int().min(1, 'Pick 1 to 5 stars').max(5, 'Pick 1 to 5 stars'),
+  comment: z.string().trim().max(280, 'Keep it under 280 characters').optional(),
+});
+export type RateRideInput = z.infer<typeof rateRideSchema>;
+
+export interface RideRating {
+  stars: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+/** A driver's average rating; null until someone has rated them. */
+export interface DriverRatingSummary {
+  average: number;
+  count: number;
+}
+
 export interface Zone {
   id: number;
   slug: string;
@@ -54,6 +73,8 @@ export interface PassengerRide {
   /** Whether the passenger may cancel right now, and what it would cost. */
   cancellation: { allowed: boolean; feePoisha: number };
   payments: PaymentView[];
+  /** The passenger's own rating of this ride, once given. */
+  rating: RideRating | null;
   requestedAt: string;
   matchedAt: string | null;
   startedAt: string | null;
@@ -63,6 +84,7 @@ export interface PassengerRide {
     id: string;
     status: PoolStatus;
     driverName: string;
+    driverRating: DriverRatingSummary | null;
     vehicle: { name: string; plate: string; capacity: number };
     seatsTaken: number;
     /** Other bookings sharing the Tesla. */
@@ -70,6 +92,32 @@ export interface PassengerRide {
     /** Your position in the drop-off order (1 = first). */
     dropoffOrder: number | null;
   } | null;
+}
+
+/** What a timeline line is about; the web app picks its marker from this. */
+export const TIMELINE_KINDS = [
+  'REQUESTED',
+  'MATCHED',
+  'REQUEUED',
+  'DRIVER_ARRIVED',
+  'STARTED',
+  'COMPLETED',
+  'CANCELLED',
+  'OTHER',
+] as const;
+export type TimelineKind = (typeof TIMELINE_KINDS)[number];
+
+/**
+ * One line of a ride's history, already worded by the API ("Jashim arrived
+ * at Banani"). The stored event metadata never leaves the server, so nothing
+ * about the other riders can leak through the timeline.
+ */
+export interface RideTimelineEntry {
+  id: number;
+  at: string;
+  kind: TimelineKind;
+  title: string;
+  detail: string | null;
 }
 
 /** One line in the passenger's ride history. */
@@ -82,5 +130,9 @@ export interface RideSummary {
   wantsShare: boolean;
   /** Final fare once known, otherwise the quote. */
   farePoisha: number;
+  /** Who drove (or is driving) it; null while waiting or after a cancellation. */
+  driverName: string | null;
+  /** The passenger's own rating, once given. */
+  stars: number | null;
   requestedAt: string;
 }

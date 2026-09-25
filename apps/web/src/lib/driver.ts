@@ -2,6 +2,7 @@
 
 import type {
   DriverFeedItem,
+  DriverHistory,
   DriverPool,
   DriverProfile,
   DriverStatusInput,
@@ -14,6 +15,7 @@ export const driverKeys = {
   profile: ['driver', 'profile'] as const,
   pool: ['driver', 'pool'] as const,
   feed: ['driver', 'requests'] as const,
+  history: ['driver', 'history'] as const,
 };
 
 export function useDriverProfile() {
@@ -39,6 +41,14 @@ export function useDriverFeed(online: boolean) {
     queryFn: async () => (await api<{ requests: DriverFeedItem[] }>('/driver/requests')).requests,
     enabled: online,
     refetchInterval: online ? 3000 : false,
+  });
+}
+
+/** Finished pools and totals; refetched when a pool ends, not polled. */
+export function useDriverHistory() {
+  return useQuery({
+    queryKey: driverKeys.history,
+    queryFn: async () => (await api<{ history: DriverHistory }>('/driver/history')).history,
   });
 }
 
@@ -68,8 +78,11 @@ export function usePoolCommand() {
     onSuccess: (pool) => {
       queryClient.setQueryData(driverKeys.pool, pool);
       void queryClient.invalidateQueries({ queryKey: driverKeys.feed });
-      // Completing a pool moves the driver to the last drop-off zone.
-      if (!pool) void queryClient.invalidateQueries({ queryKey: driverKeys.profile });
+      // A finished pool moves the driver to the last drop-off zone and into history.
+      if (!pool) {
+        void queryClient.invalidateQueries({ queryKey: driverKeys.profile });
+        void queryClient.invalidateQueries({ queryKey: driverKeys.history });
+      }
     },
     onError: (error) => toast.error(error.message),
   });

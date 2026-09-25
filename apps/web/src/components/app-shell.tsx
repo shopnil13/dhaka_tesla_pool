@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { LoadError } from '@/components/load-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 export interface NavItem {
   href: string;
   label: string;
+  /** Also highlight this tab below these paths (e.g. a ride's page under History). */
+  alsoActiveUnder?: string;
 }
 
 function AreaNav({ items }: { items: NavItem[] }) {
@@ -21,7 +23,9 @@ function AreaNav({ items }: { items: NavItem[] }) {
   return (
     <nav className="mx-auto flex max-w-3xl gap-1 px-4" aria-label="Sections">
       {items.map((item) => {
-        const active = pathname === item.href;
+        const active =
+          pathname === item.href ||
+          (item.alsoActiveUnder !== undefined && pathname.startsWith(item.alsoActiveUnder));
         return (
           <Link
             key={item.href}
@@ -87,14 +91,7 @@ export function AppShell({ children, nav = [] }: { children: ReactNode; nav?: Na
             <Skeleton className="h-32 w-full" />
           </div>
         ) : me.error ? (
-          <Alert variant="destructive">
-            <AlertDescription className="flex items-center justify-between gap-4">
-              {me.error.message}
-              <Button variant="outline" size="sm" onClick={() => me.refetch()}>
-                Try again
-              </Button>
-            </AlertDescription>
-          </Alert>
+          <LoadError message={me.error.message} onRetry={() => me.refetch()} />
         ) : (
           children
         )}

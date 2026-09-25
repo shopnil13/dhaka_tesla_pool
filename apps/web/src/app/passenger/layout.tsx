@@ -2,6 +2,7 @@ import { AppShell, type NavItem } from '@/components/app-shell';
 
 const PASSENGER_NAV: NavItem[] = [
   { href: '/passenger', label: 'Ride' },
+  { href: '/passenger/history', label: 'History', alsoActiveUnder: '/passenger/rides/' },
   { href: '/passenger/wallet', label: 'TeslaPay' },
 ];
 

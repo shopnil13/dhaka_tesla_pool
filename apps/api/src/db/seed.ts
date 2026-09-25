@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { db, pgPool } from './client';
 import { seedDatabase } from './seedDatabase';
+import { seedDemoHistory } from './seedDemoHistory';
 
 const { SEED_DEMO_PASSWORD } = z
   .object({
@@ -11,7 +12,9 @@ const { SEED_DEMO_PASSWORD } = z
 
 try {
   const result = await seedDatabase(db, SEED_DEMO_PASSWORD);
-  logger.info(result, 'Seed complete');
+  // Yesterday's shared trip, only into a world that has no rides yet.
+  const history = await seedDemoHistory(db);
+  logger.info({ ...result, demoHistory: history.created }, 'Seed complete');
 } catch (err) {
   logger.fatal({ err }, 'Seed failed');
   process.exitCode = 1;

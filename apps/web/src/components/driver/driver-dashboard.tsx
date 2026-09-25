@@ -1,7 +1,6 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { LoadError } from '@/components/load-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDriverFeed, useDriverPool, useDriverProfile } from '@/lib/driver';
 import { PoolCard } from './pool-card';
@@ -17,21 +16,13 @@ export function DriverDashboard() {
   const error = profile.error ?? pool.error;
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription className="flex items-center justify-between gap-4">
-          {error.message}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              void profile.refetch();
-              void pool.refetch();
-            }}
-          >
-            Try again
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <LoadError
+        message={error.message}
+        onRetry={() => {
+          void profile.refetch();
+          void pool.refetch();
+        }}
+      />
     );
   }
   if (!profile.data || pool.data === undefined) return <Skeleton className="h-96 w-full" />;

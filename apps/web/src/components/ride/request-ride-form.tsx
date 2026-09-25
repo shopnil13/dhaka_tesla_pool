@@ -11,6 +11,7 @@ import {
 } from '@teslapool/shared';
 import { useState, type FormEvent } from 'react';
 import { z } from 'zod';
+import { LoadError } from '@/components/load-error';
 import { SegmentedControl } from '@/components/segmented-control';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -97,16 +98,7 @@ export function RequestRideForm() {
 
   if (zones.isPending) return <Skeleton className="h-96 w-full" />;
   if (zones.error) {
-    return (
-      <Alert variant="destructive">
-        <AlertDescription className="flex items-center justify-between gap-4">
-          {zones.error.message}
-          <Button variant="outline" size="sm" onClick={() => zones.refetch()}>
-            Try again
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
+    return <LoadError message={zones.error.message} onRetry={() => zones.refetch()} />;
   }
 
   return (
