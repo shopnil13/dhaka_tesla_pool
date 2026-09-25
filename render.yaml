@@ -1,0 +1,44 @@
+# Render Blueprint for the API: https://render.com/docs/blueprint-spec
+# The web app is deployed on Vercel and the database on Neon (both free).
+# Render's free Postgres is deleted after 30 days, so it is not used.
+services:
+  - type: web
+    name: dhaka-tesla-pool-api
+    runtime: docker
+    plan: free
+    # Closest region to Dhaka; create the Neon database in AWS Singapore too.
+    region: singapore
+    dockerContext: .
+    dockerfilePath: ./apps/api/Dockerfile
+    # Pre-deploy commands are paid-only, so migrations and the (idempotent)
+    # seed run on every container start, including each wake from sleep.
+    dockerCommand: sh -c "node dist/migrate.js && node dist/seed.js && node dist/server.js"
+    # Pings the database too, so a deploy with a broken DATABASE_URL never goes live.
+    healthCheckPath: /api/v1/health
+    # Deploy a new commit only once its GitHub checks (the CI workflow) pass.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      # Neon's direct (non-pooled) connection string, with ?sslmode=require.
+      # Entered in the Render dashboard, never committed.
+      - key: DATABASE_URL
+        sync: false
+      # Render generates a random 256-bit value on first deploy.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN_HOURS
+        value: '12'
+      # Served over HTTPS (browser → Vercel), so the session cookie is Secure.
+      - key: COOKIE_SECURE
+        value: 'true'
+      # Vercel's proxy, then Render's load balancer.
+      - key: TRUST_PROXY_HOPS
+        value: '2'
+      - key: AUTH_RATE_LIMIT
+        value: '20'
+      # Password of the seeded demo accounts (published in the README on purpose).
+      - key: SEED_DEMO_PASSWORD
+        sync: false
