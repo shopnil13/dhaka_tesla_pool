@@ -72,6 +72,32 @@ export interface PassengerRide {
   } | null;
 }
 
+/** What a timeline line is about; the web app picks its marker from this. */
+export const TIMELINE_KINDS = [
+  'REQUESTED',
+  'MATCHED',
+  'REQUEUED',
+  'DRIVER_ARRIVED',
+  'STARTED',
+  'COMPLETED',
+  'CANCELLED',
+  'OTHER',
+] as const;
+export type TimelineKind = (typeof TIMELINE_KINDS)[number];
+
+/**
+ * One line of a ride's history, already worded by the API ("Jashim arrived
+ * at Banani"). The stored event metadata never leaves the server, so nothing
+ * about the other riders can leak through the timeline.
+ */
+export interface RideTimelineEntry {
+  id: number;
+  at: string;
+  kind: TimelineKind;
+  title: string;
+  detail: string | null;
+}
+
 /** One line in the passenger's ride history. */
 export interface RideSummary {
   id: string;

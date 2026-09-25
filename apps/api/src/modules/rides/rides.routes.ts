@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { authOf, requireAuth, requireRole } from '../../middleware/auth';
 import { idParam } from '../../middleware/params';
 import { validateBody } from '../../middleware/validate';
-import { getActiveRide, getPassengerRide, listRides } from './rides.queries';
+import { getActiveRide, getPassengerRide, getRideTimeline, listRides } from './rides.queries';
 import { cancelRide, requestRide } from './rides.service';
 
 /** Passenger-facing ride endpoints. Every query is scoped to the caller. */
@@ -28,6 +28,11 @@ ridesRouter.get('/rides/active', async (req, res) => {
 ridesRouter.get('/rides/:id', async (req, res) => {
   const ride = await getPassengerRide(authOf(req).userId, idParam(req.params.id, 'Ride'));
   res.json({ ride });
+});
+
+ridesRouter.get('/rides/:id/events', async (req, res) => {
+  const events = await getRideTimeline(authOf(req).userId, idParam(req.params.id, 'Ride'));
+  res.json({ events });
 });
 
 ridesRouter.post('/rides/:id/cancel', async (req, res) => {
