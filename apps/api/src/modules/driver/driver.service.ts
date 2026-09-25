@@ -16,6 +16,7 @@ import {
   lockRide,
   type PoolRow,
 } from '../pools/pools.repository';
+import { chargeRide } from '../payments/payments.service';
 import { assertKnownZones, loadZoneMap } from '../zones/zones.service';
 import { lockDriver } from './driver.repository';
 
@@ -230,6 +231,8 @@ export async function dropOff(driverId: string, poolId: string, rideId: string) 
       .update(rideRequests)
       .set({ status: 'COMPLETED', completedAt: new Date() })
       .where(eq(rideRequests.id, ride.id));
+    // Pay in the same transaction: a drop-off without its payment cannot commit.
+    const charged = await chargeRide(tx, ride);
     await recordEvent(tx, {
       rideRequestId: ride.id,
       from: ride.status,
@@ -237,6 +240,7 @@ export async function dropOff(driverId: string, poolId: string, rideId: string) 
       actorId: driverId,
       actorRole: 'DRIVER',
       reason: 'Dropped off',
+      metadata: charged,
     });
 
     const [{ stillRiding } = { stillRiding: 0 }] = await tx
