@@ -3,7 +3,12 @@ import { Router, type Request } from 'express';
 import { authOf, requireAuth, requireRole } from '../../middleware/auth';
 import { idParam } from '../../middleware/params';
 import { validateBody } from '../../middleware/validate';
-import { getCurrentPool, getDriverFeed, getDriverProfile } from './driver.queries';
+import {
+  getCurrentPool,
+  getDriverFeed,
+  getDriverHistory,
+  getDriverProfile,
+} from './driver.queries';
 import {
   acceptRequest,
   cancelPool,
@@ -45,6 +50,10 @@ driverRouter.post('/driver/requests/:rideId/accept', async (req, res) => {
 
 driverRouter.get('/driver/pool', async (req, res) => {
   res.json({ pool: await getCurrentPool(driverId(req)) });
+});
+
+driverRouter.get('/driver/history', async (req, res) => {
+  res.json({ history: await getDriverHistory(driverId(req)) });
 });
 
 driverRouter.post('/driver/pools/:poolId/arrive', async (req, res) => {
