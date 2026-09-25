@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PAYMENT_METHODS, type PaymentMethod, type PoolStatus, type RideStatus } from '../enums';
 import { MAX_SEATS_PER_REQUEST, MAX_SHARED_SEATS, type FareBreakdown } from '../fare';
+import type { PaymentView } from './wallet';
 
 const zoneId = z.coerce.number().int().positive();
 
@@ -50,6 +51,9 @@ export interface PassengerRide {
   finalFarePoisha: number | null;
   fareBreakdown: FareBreakdown | null;
   cancellationFeePoisha: number;
+  /** Whether the passenger may cancel right now, and what it would cost. */
+  cancellation: { allowed: boolean; feePoisha: number };
+  payments: PaymentView[];
   requestedAt: string;
   matchedAt: string | null;
   startedAt: string | null;

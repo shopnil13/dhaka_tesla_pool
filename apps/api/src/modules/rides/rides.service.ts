@@ -1,19 +1,26 @@
 import type { RideRequestInput } from '@teslapool/shared';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db, type Tx } from '../../db/client';
-import { rideRequests } from '../../db/schema';
+import { poolMemberships, rideRequests } from '../../db/schema';
+import { passengerCancellation } from '../../domain/cancellation';
 import { quoteFare } from '../../domain/fare';
 import { checkCompatibility, type DistanceLookup } from '../../domain/matching';
+import { assertRideTransition } from '../../domain/stateMachine';
 import { isUniqueViolation } from '../../lib/dbErrors';
-import { AppError } from '../../lib/errors';
+import { AppError, NotFoundError } from '../../lib/errors';
 import { recordEvent } from '../../lib/events';
 import {
   activeMembers,
   asJoinCandidate,
   findJoinCandidates,
   joinPool,
+  leavePool,
   lockPool,
+  lockRide,
   type RideRow,
 } from '../pools/pools.repository';
+import { chargeCancellationFee } from '../payments/payments.service';
+import { assertTeslaPayCovers } from '../payments/wallet.service';
 import { assertKnownZones, loadZoneMap } from '../zones/zones.service';
 import { getPassengerRide } from './rides.queries';
 
@@ -31,6 +38,9 @@ export async function requestRide(passengerId: string, input: RideRequestInput) 
   });
   const distanceM = zoneMap.distance(input.pickupZoneId, input.dropoffZoneId);
   const quote = quoteFare({ distanceM, seats: input.seats, wantsShare: input.wantsShare });
+  if (input.paymentMethod === 'TESLAPAY') {
+    await assertTeslaPayCovers(passengerId, quote.totalPoisha);
+  }
 
   const rideId = await db.transaction(async (tx) => {
     const ride = await insertRequest(tx, passengerId, input, distanceM, quote.totalPoisha);
@@ -107,4 +117,92 @@ async function tryAutoMatch(tx: Tx, ride: RideRow, distance: DistanceLookup) {
     return pool.id;
   }
   return null;
+}
+
+/** Thrown when the ride changed between the unlocked read and taking the locks. */
+class RideChangedWhileLocking extends Error {}
+
+/**
+ * A passenger cancels. The pool (if any) is locked before the ride, following
+ * the global lock order, so this is serialized with the driver pressing
+ * Arrive or Start on the same pool. The cancellation policy is then applied
+ * to the *locked* state: cancelling "just before" the driver arrives but
+ * committing after is charged, and cancelling after the trip started is refused.
+ */
+export async function cancelRide(passengerId: string, rideId: string) {
+  const zoneMap = await loadZoneMap();
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await db.transaction((tx) => cancelOnce(tx, passengerId, rideId, zoneMap.distance));
+      return getPassengerRide(passengerId, rideId);
+    } catch (err) {
+      // The ride moved into (or out of) a pool between our first read and our
+      // locks — e.g. a driver accepted it at that very moment. Locking the new
+      // pool now would break the lock order, so start again from scratch.
+      if (!(err instanceof RideChangedWhileLocking)) throw err;
+      if (attempt === 3) {
+        throw new AppError(
+          409,
+          'CONFLICT',
+          'Your ride changed while cancelling. Please try again.',
+        );
+      }
+    }
+  }
+}
+
+async function cancelOnce(tx: Tx, passengerId: string, rideId: string, distance: DistanceLookup) {
+  // 1. Unlocked read: which pool (if any) must be locked first?
+  const seenPoolId = await currentPoolIdOf(tx, passengerId, rideId);
+
+  // 2. Locks in the global order: pool → ride (→ wallet, inside the fee charge).
+  const pool = seenPoolId ? await lockPool(tx, seenPoolId) : null;
+  const ride = await lockRide(tx, rideId);
+  if (ride.passengerId !== passengerId) throw new NotFoundError('Ride not found');
+  if ((await currentPoolIdOf(tx, passengerId, rideId)) !== seenPoolId) {
+    throw new RideChangedWhileLocking();
+  }
+
+  // 3. Decide on the locked state.
+  const decision = passengerCancellation(ride.status, pool?.status ?? null);
+  if (!decision.allowed) throw new AppError(409, 'CANCEL_NOT_ALLOWED', decision.reason);
+  assertRideTransition(ride.status, 'CANCELLED');
+
+  // 4. Apply: free the seat, cancel the ride, charge the fee if due.
+  const left = pool ? await leavePool(tx, { pool, ride, distance }) : null;
+  await tx
+    .update(rideRequests)
+    .set({
+      status: 'CANCELLED',
+      cancelledAt: new Date(),
+      cancelledBy: 'PASSENGER',
+      cancellationFeePoisha: decision.feePoisha,
+    })
+    .where(eq(rideRequests.id, ride.id));
+  const fee =
+    decision.feePoisha > 0 ? await chargeCancellationFee(tx, ride, decision.feePoisha) : null;
+
+  await recordEvent(tx, {
+    rideRequestId: ride.id,
+    from: ride.status,
+    to: 'CANCELLED',
+    actorId: passengerId,
+    actorRole: 'PASSENGER',
+    reason: fee ? 'Cancelled after the driver arrived' : 'Cancelled by the passenger',
+    metadata: { poolId: pool?.id ?? null, fee, poolCancelled: left?.poolCancelled ?? false },
+  });
+}
+
+/** The pool the ride is seated in right now (membership not left), or null. */
+async function currentPoolIdOf(tx: Tx, passengerId: string, rideId: string) {
+  const [row] = await tx
+    .select({ exists: rideRequests.id, poolId: poolMemberships.poolId })
+    .from(rideRequests)
+    .leftJoin(
+      poolMemberships,
+      and(eq(poolMemberships.rideRequestId, rideRequests.id), isNull(poolMemberships.leftAt)),
+    )
+    .where(and(eq(rideRequests.id, rideId), eq(rideRequests.passengerId, passengerId)));
+  if (!row) throw new NotFoundError('Ride not found');
+  return row.poolId;
 }

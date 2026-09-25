@@ -1,8 +1,17 @@
 import type { FareBreakdown, PassengerRide, RideSummary } from '@teslapool/shared';
-import { and, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../../db/client';
-import { poolMemberships, pools, rideRequests, users, vehicles, zones } from '../../db/schema';
+import {
+  payments,
+  poolMemberships,
+  pools,
+  rideRequests,
+  users,
+  vehicles,
+  zones,
+} from '../../db/schema';
+import { passengerCancellation } from '../../domain/cancellation';
 import { NotFoundError } from '../../lib/errors';
 
 const pickupZone = alias(zones, 'pickup_zone');
@@ -52,7 +61,19 @@ export async function getPassengerRide(
       )
     : 0;
 
+  const paymentRows = await db
+    .select({
+      purpose: payments.purpose,
+      method: payments.method,
+      status: payments.status,
+      amountPoisha: payments.amountPoisha,
+    })
+    .from(payments)
+    .where(eq(payments.rideRequestId, rideId))
+    .orderBy(asc(payments.createdAt));
+
   const { ride, pickup, dropoff } = row;
+  const cancellation = passengerCancellation(ride.status, seat?.pool.status ?? null);
   return {
     id: ride.id,
     status: ride.status,
@@ -66,6 +87,10 @@ export async function getPassengerRide(
     finalFarePoisha: ride.finalFarePoisha,
     fareBreakdown: ride.fareBreakdown as FareBreakdown | null,
     cancellationFeePoisha: ride.cancellationFeePoisha,
+    cancellation: cancellation.allowed
+      ? { allowed: true, feePoisha: cancellation.feePoisha }
+      : { allowed: false, feePoisha: 0 },
+    payments: paymentRows,
     requestedAt: ride.requestedAt.toISOString(),
     matchedAt: iso(ride.matchedAt),
     startedAt: iso(ride.startedAt),

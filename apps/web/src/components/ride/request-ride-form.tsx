@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatTaka } from '@/lib/format';
 import { useFareEstimate, useRequestRide, useZones } from '@/lib/rides';
+import { useWallet } from '@/lib/wallet';
 import { FareEstimatePanel } from './fare-estimate';
 
 const SELECT_CLASS =
@@ -74,6 +75,7 @@ export function RequestRideForm() {
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH');
   const estimate = useFareEstimate(trip);
+  const wallet = useWallet();
 
   const check = tripSchema.safeParse(trip);
   const bothZonesChosen = trip.pickupZoneId > 0 && trip.dropoffZoneId > 0;
@@ -177,7 +179,12 @@ export function RequestRideForm() {
               value={paymentMethod}
               options={[
                 { value: 'CASH', label: 'Cash' },
-                { value: 'TESLAPAY', label: 'TeslaPay' },
+                {
+                  value: 'TESLAPAY',
+                  label: wallet.data
+                    ? `TeslaPay · ${formatTaka(wallet.data.balancePoisha)}`
+                    : 'TeslaPay',
+                },
               ]}
               onChange={setPaymentMethod}
             />

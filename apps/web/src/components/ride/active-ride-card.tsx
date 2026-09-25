@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatKm, formatTaka, ordinal } from '@/lib/format';
 import { rideStage, STAGE_STEPS, stageHeadline } from '@/lib/ride-status';
 import { cn } from '@/lib/utils';
+import { CancelRideButton } from './cancel-ride-button';
 
 function StageStepper({ ride }: { ride: PassengerRide }) {
   const current = STAGE_STEPS.findIndex((step) => step.stage === rideStage(ride));
@@ -86,6 +87,8 @@ export function ActiveRideCard({ ride }: { ride: PassengerRide }) {
               : `Drivers near ${ride.pickupZone.name} can see your request.`}
           </p>
         )}
+
+        <CancelRideButton ride={ride} />
       </CardContent>
     </Card>
   );

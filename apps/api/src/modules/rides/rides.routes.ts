@@ -4,7 +4,7 @@ import { authOf, requireAuth, requireRole } from '../../middleware/auth';
 import { idParam } from '../../middleware/params';
 import { validateBody } from '../../middleware/validate';
 import { getActiveRide, getPassengerRide, listRides } from './rides.queries';
-import { requestRide } from './rides.service';
+import { cancelRide, requestRide } from './rides.service';
 
 /** Passenger-facing ride endpoints. Every query is scoped to the caller. */
 export const ridesRouter = Router();
@@ -27,5 +27,10 @@ ridesRouter.get('/rides/active', async (req, res) => {
 
 ridesRouter.get('/rides/:id', async (req, res) => {
   const ride = await getPassengerRide(authOf(req).userId, idParam(req.params.id, 'Ride'));
+  res.json({ ride });
+});
+
+ridesRouter.post('/rides/:id/cancel', async (req, res) => {
+  const ride = await cancelRide(authOf(req).userId, idParam(req.params.id, 'Ride'));
   res.json({ ride });
 });

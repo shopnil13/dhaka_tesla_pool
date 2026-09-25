@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,41 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError } from '@/lib/api';
 import { useLogout, useMe } from '@/lib/auth';
+import { cn } from '@/lib/utils';
+
+export interface NavItem {
+  href: string;
+  label: string;
+}
+
+function AreaNav({ items }: { items: NavItem[] }) {
+  const pathname = usePathname();
+  return (
+    <nav className="mx-auto flex max-w-3xl gap-1 px-4" aria-label="Sections">
+      {items.map((item) => {
+        const active = pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              '-mb-px border-b-2 px-3 py-2 text-sm',
+              active
+                ? 'border-primary font-medium'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 /** Header + page frame for the signed-in areas (passenger and driver). */
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, nav = [] }: { children: ReactNode; nav?: NavItem[] }) {
   const router = useRouter();
   const me = useMe();
   const logout = useLogout();
@@ -45,6 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           )}
         </div>
+        {nav.length > 0 && <AreaNav items={nav} />}
       </header>
 
       <main className="mx-auto grid max-w-3xl gap-6 px-4 py-6">

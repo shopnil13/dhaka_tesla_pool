@@ -1,9 +1,10 @@
 import type { DriverFeedItem, DriverPool, DriverProfile } from '@teslapool/shared';
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../../db/client';
 import {
   driverProfiles,
+  payments,
   poolMemberships,
   pools,
   rideRequests,
@@ -58,6 +59,21 @@ export async function getCurrentPool(driverId: string): Promise<DriverPool | nul
     .where(and(eq(poolMemberships.poolId, row.pool.id), isNull(poolMemberships.leftAt)))
     .orderBy(asc(poolMemberships.dropoffOrder), asc(poolMemberships.joinedAt));
 
+  // Unpaid cash fees from earlier rides are collected together with this fare.
+  const passengerIds = members.map((m) => m.ride.passengerId);
+  const dues = passengerIds.length
+    ? await db
+        .select({
+          passengerId: payments.passengerId,
+          total: sql<number>`sum(${payments.amountPoisha})::int`,
+        })
+        .from(payments)
+        .where(and(inArray(payments.passengerId, passengerIds), eq(payments.status, 'DUE')))
+        .groupBy(payments.passengerId)
+    : [];
+  const duesOf = (passengerId: string) =>
+    dues.find((due) => due.passengerId === passengerId)?.total ?? 0;
+
   const { pool } = row;
   return {
     id: pool.id,
@@ -79,6 +95,7 @@ export async function getCurrentPool(driverId: string): Promise<DriverPool | nul
       paymentMethod: m.ride.paymentMethod,
       quotedFarePoisha: m.ride.quotedFarePoisha,
       finalFarePoisha: m.ride.finalFarePoisha,
+      duesPoisha: duesOf(m.ride.passengerId),
     })),
   };
 }
