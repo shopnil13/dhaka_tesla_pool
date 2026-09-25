@@ -13,6 +13,7 @@ export const ERROR_CODES = [
   'CONFLICT',
   'EMAIL_TAKEN',
   'INVALID_TRANSITION',
+  'ACTIVE_RIDE_EXISTS',
   'RATE_LIMITED',
   'INTERNAL_ERROR',
 ] as const;

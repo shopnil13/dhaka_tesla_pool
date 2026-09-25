@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { MAX_SEATS_PER_REQUEST, MAX_SHARED_SEATS } from '../fare';
+import { PAYMENT_METHODS, type PaymentMethod, type PoolStatus, type RideStatus } from '../enums';
+import { MAX_SEATS_PER_REQUEST, MAX_SHARED_SEATS, type FareBreakdown } from '../fare';
 
 const zoneId = z.coerce.number().int().positive();
 
@@ -21,8 +22,61 @@ export const tripSchema = z
   });
 export type TripInput = z.infer<typeof tripSchema>;
 
+export const rideRequestSchema = tripSchema.and(
+  z.object({ paymentMethod: z.enum(PAYMENT_METHODS) }),
+);
+export type RideRequestInput = z.infer<typeof rideRequestSchema>;
+
 export interface Zone {
   id: number;
   slug: string;
   name: string;
+}
+
+/**
+ * A ride as its passenger sees it: their own status and fare, the driver and
+ * vehicle, but only a count of co-riders — never their names or fares.
+ */
+export interface PassengerRide {
+  id: string;
+  status: RideStatus;
+  pickupZone: Zone;
+  dropoffZone: Zone;
+  seats: number;
+  wantsShare: boolean;
+  paymentMethod: PaymentMethod;
+  distanceM: number;
+  quotedFarePoisha: number;
+  finalFarePoisha: number | null;
+  fareBreakdown: FareBreakdown | null;
+  cancellationFeePoisha: number;
+  requestedAt: string;
+  matchedAt: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  pool: {
+    id: string;
+    status: PoolStatus;
+    driverName: string;
+    vehicle: { name: string; plate: string; capacity: number };
+    seatsTaken: number;
+    /** Other bookings sharing the Tesla. */
+    coRiders: number;
+    /** Your position in the drop-off order (1 = first). */
+    dropoffOrder: number | null;
+  } | null;
+}
+
+/** One line in the passenger's ride history. */
+export interface RideSummary {
+  id: string;
+  status: RideStatus;
+  pickupZone: string;
+  dropoffZone: string;
+  seats: number;
+  wantsShare: boolean;
+  /** Final fare once known, otherwise the quote. */
+  farePoisha: number;
+  requestedAt: string;
 }

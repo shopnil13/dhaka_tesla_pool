@@ -14,3 +14,6 @@ export const pgPool = new pg.Pool({
 export const db = drizzle(pgPool, { schema });
 
 export type Db = typeof db;
+
+/** The handle passed to db.transaction() callbacks. */
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
