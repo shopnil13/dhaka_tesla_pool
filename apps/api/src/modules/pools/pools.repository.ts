@@ -44,12 +44,35 @@ export function findJoinCandidates(tx: Tx, pickupZoneId: number, seats: number) 
  * happens while this lock is held, so two passengers racing for Bullet's last
  * seat are served one after the other, never at the same time.
  *
- * Lock order everywhere: pools → ride_requests → wallet_accounts (no deadlocks).
+ * Lock order everywhere (so no two transactions can wait on each other in a
+ * cycle): driver_profiles → pools → ride_requests → wallet_accounts.
  */
 export async function lockPool(tx: Tx, poolId: string): Promise<PoolRow> {
   const [pool] = await tx.select().from(pools).where(eq(pools.id, poolId)).for('update');
   if (!pool) throw new NotFoundError('Pool not found');
   return pool;
+}
+
+/** Locks a ride request; used when a driver or passenger changes its state. */
+export async function lockRide(tx: Tx, rideId: string): Promise<RideRow> {
+  const [ride] = await tx
+    .select()
+    .from(rideRequests)
+    .where(eq(rideRequests.id, rideId))
+    .for('update');
+  if (!ride) throw new NotFoundError('Ride not found');
+  return ride;
+}
+
+const ACTIVE_POOL_STATUSES = ['ACCEPTED', 'DRIVER_ARRIVED', 'STARTED'] as const;
+
+/** The driver's pool that is not finished yet (at most one, by a partial unique index). */
+export async function findActivePoolId(tx: Tx, driverId: string) {
+  const [pool] = await tx
+    .select({ id: pools.id })
+    .from(pools)
+    .where(and(eq(pools.driverId, driverId), inArray(pools.status, [...ACTIVE_POOL_STATUSES])));
+  return pool?.id ?? null;
 }
 
 /** Current members in join order (the order the route planner breaks ties by). */
