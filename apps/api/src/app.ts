@@ -8,6 +8,7 @@ import { requireJsonBody } from './middleware/security';
 import { createAuthRouter } from './modules/auth/auth.routes';
 import { driverRouter } from './modules/driver/driver.routes';
 import { faresRouter } from './modules/fares/fares.routes';
+import { walletRouter } from './modules/payments/wallet.routes';
 import { ridesRouter } from './modules/rides/rides.routes';
 import { zonesRouter } from './modules/zones/zones.routes';
 import { healthRouter } from './routes/health';
@@ -31,6 +32,7 @@ export function createApp() {
   app.use('/api/v1', faresRouter);
   app.use('/api/v1', ridesRouter);
   app.use('/api/v1', driverRouter);
+  app.use('/api/v1', walletRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

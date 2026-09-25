@@ -40,6 +40,8 @@ export interface DriverPoolMember {
   paymentMethod: PaymentMethod;
   quotedFarePoisha: number;
   finalFarePoisha: number | null;
+  /** Earlier unpaid cash fees, collected together with this fare. */
+  duesPoisha: number;
 }
 
 /** The driver's current trip, with everyone aboard (drivers do see names and fares). */

@@ -14,6 +14,7 @@ import {
   lockPool,
   type RideRow,
 } from '../pools/pools.repository';
+import { assertTeslaPayCovers } from '../payments/wallet.service';
 import { assertKnownZones, loadZoneMap } from '../zones/zones.service';
 import { getPassengerRide } from './rides.queries';
 
@@ -31,6 +32,9 @@ export async function requestRide(passengerId: string, input: RideRequestInput) 
   });
   const distanceM = zoneMap.distance(input.pickupZoneId, input.dropoffZoneId);
   const quote = quoteFare({ distanceM, seats: input.seats, wantsShare: input.wantsShare });
+  if (input.paymentMethod === 'TESLAPAY') {
+    await assertTeslaPayCovers(passengerId, quote.totalPoisha);
+  }
 
   const rideId = await db.transaction(async (tx) => {
     const ride = await insertRequest(tx, passengerId, input, distanceM, quote.totalPoisha);
