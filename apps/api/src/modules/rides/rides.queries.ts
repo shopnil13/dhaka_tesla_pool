@@ -11,6 +11,7 @@ import {
   payments,
   poolMemberships,
   pools,
+  ratings,
   rideEvents,
   rideRequests,
   users,
@@ -20,6 +21,7 @@ import {
 import { passengerCancellation } from '../../domain/cancellation';
 import { describeRideEvent } from '../../domain/timeline';
 import { NotFoundError } from '../../lib/errors';
+import { driverRatingSummary } from '../ratings/ratings.service';
 
 const pickupZone = alias(zones, 'pickup_zone');
 const dropoffZone = alias(zones, 'dropoff_zone');
@@ -69,6 +71,12 @@ export async function getPassengerRide(
       )
     : 0;
 
+  const [rating] = await db
+    .select({ stars: ratings.stars, comment: ratings.comment, createdAt: ratings.createdAt })
+    .from(ratings)
+    .where(eq(ratings.rideRequestId, rideId));
+  const driverRating = seat ? await driverRatingSummary(seat.pool.driverId) : null;
+
   const paymentRows = await db
     .select({
       purpose: payments.purpose,
@@ -99,6 +107,7 @@ export async function getPassengerRide(
       ? { allowed: true, feePoisha: cancellation.feePoisha }
       : { allowed: false, feePoisha: 0 },
     payments: paymentRows,
+    rating: rating ? { ...rating, createdAt: rating.createdAt.toISOString() } : null,
     requestedAt: ride.requestedAt.toISOString(),
     matchedAt: iso(ride.matchedAt),
     startedAt: iso(ride.startedAt),
@@ -109,6 +118,7 @@ export async function getPassengerRide(
           id: seat.pool.id,
           status: seat.pool.status,
           driverName: seat.driverName,
+          driverRating,
           vehicle: seat.vehicle,
           seatsTaken: seat.pool.seatsTaken,
           coRiders,
@@ -135,15 +145,29 @@ export async function getActiveRide(passengerId: string): Promise<PassengerRide 
 /** Newest first; capped because this is a screen, not an export. */
 export async function listRides(passengerId: string, limit = 50): Promise<RideSummary[]> {
   const rows = await db
-    .select({ ride: rideRequests, pickup: pickupZone.name, dropoff: dropoffZone.name })
+    .select({
+      ride: rideRequests,
+      pickup: pickupZone.name,
+      dropoff: dropoffZone.name,
+      driverName: users.name,
+      stars: ratings.stars,
+    })
     .from(rideRequests)
     .innerJoin(pickupZone, eq(pickupZone.id, rideRequests.pickupZoneId))
     .innerJoin(dropoffZone, eq(dropoffZone.id, rideRequests.dropoffZoneId))
+    // The pool the ride is (or finished) in; a cancelled ride has left its pool.
+    .leftJoin(
+      poolMemberships,
+      and(eq(poolMemberships.rideRequestId, rideRequests.id), isNull(poolMemberships.leftAt)),
+    )
+    .leftJoin(pools, eq(pools.id, poolMemberships.poolId))
+    .leftJoin(users, eq(users.id, pools.driverId))
+    .leftJoin(ratings, eq(ratings.rideRequestId, rideRequests.id))
     .where(eq(rideRequests.passengerId, passengerId))
     .orderBy(desc(rideRequests.requestedAt))
     .limit(limit);
 
-  return rows.map(({ ride, pickup, dropoff }) => ({
+  return rows.map(({ ride, pickup, dropoff, driverName, stars }) => ({
     id: ride.id,
     status: ride.status,
     pickupZone: pickup,
@@ -151,6 +175,8 @@ export async function listRides(passengerId: string, limit = 50): Promise<RideSu
     seats: ride.seats,
     wantsShare: ride.wantsShare,
     farePoisha: ride.finalFarePoisha ?? ride.quotedFarePoisha,
+    driverName,
+    stars,
     requestedAt: ride.requestedAt.toISOString(),
   }));
 }

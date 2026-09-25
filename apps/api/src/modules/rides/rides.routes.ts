@@ -1,9 +1,15 @@
-import { rideRequestSchema, type RideRequestInput } from '@teslapool/shared';
+import {
+  rateRideSchema,
+  rideRequestSchema,
+  type RateRideInput,
+  type RideRequestInput,
+} from '@teslapool/shared';
 import { Router } from 'express';
 import { authOf, requireAuth, requireRole } from '../../middleware/auth';
 import { idParam } from '../../middleware/params';
 import { validateBody } from '../../middleware/validate';
 import { getActiveRide, getPassengerRide, getRideTimeline, listRides } from './rides.queries';
+import { rateRide } from '../ratings/ratings.service';
 import { cancelRide, requestRide } from './rides.service';
 
 /** Passenger-facing ride endpoints. Every query is scoped to the caller. */
@@ -38,4 +44,11 @@ ridesRouter.get('/rides/:id/events', async (req, res) => {
 ridesRouter.post('/rides/:id/cancel', async (req, res) => {
   const ride = await cancelRide(authOf(req).userId, idParam(req.params.id, 'Ride'));
   res.json({ ride });
+});
+
+ridesRouter.post('/rides/:id/rating', validateBody(rateRideSchema), async (req, res) => {
+  const passengerId = authOf(req).userId;
+  const rideId = idParam(req.params.id, 'Ride');
+  await rateRide(passengerId, rideId, req.body as RateRideInput);
+  res.status(201).json({ ride: await getPassengerRide(passengerId, rideId) });
 });
