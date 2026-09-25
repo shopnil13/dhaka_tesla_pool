@@ -1,18 +1,15 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { expect } from 'vitest';
 import { db } from '../../src/db/client';
 import { users, vehicles, zones } from '../../src/db/schema';
 import { seedDatabase } from '../../src/db/seedDatabase';
+import { truncateAllTables } from '../../src/db/truncate';
 
 export const TEST_PASSWORD = 'bullet-test-password';
 
 /** Empties every table and re-seeds the story cast, so each test starts from the same world. */
 export async function resetDatabase() {
-  const { rows } = await db.execute<{ tablename: string }>(
-    sql`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
-  );
-  const tables = rows.map((r) => `"${r.tablename}"`).join(', ');
-  await db.execute(sql.raw(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`));
+  await truncateAllTables(db);
   await seedDatabase(db, TEST_PASSWORD);
 }
 
