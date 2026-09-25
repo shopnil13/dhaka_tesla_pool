@@ -9,7 +9,10 @@ import {
   type Zone,
 } from '@teslapool/shared';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { api } from './api';
+import { formatTaka } from './format';
+import { walletKey } from './wallet';
 
 export const rideKeys = {
   active: ['rides', 'active'] as const,
@@ -65,5 +68,24 @@ export function useRequestRide() {
       queryClient.setQueryData(rideKeys.active, ride);
       void queryClient.invalidateQueries({ queryKey: rideKeys.history });
     },
+  });
+}
+
+export function useCancelRide() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (rideId: string) =>
+      (await api<{ ride: PassengerRide }>(`/rides/${rideId}/cancel`, { method: 'POST' })).ride,
+    onSuccess: (ride) => {
+      queryClient.setQueryData(rideKeys.active, null);
+      void queryClient.invalidateQueries({ queryKey: rideKeys.history });
+      void queryClient.invalidateQueries({ queryKey: walletKey });
+      toast.success(
+        ride.cancellationFeePoisha > 0
+          ? `Ride cancelled. A ${formatTaka(ride.cancellationFeePoisha)} late fee was charged.`
+          : 'Ride cancelled. No charge.',
+      );
+    },
+    onError: (error) => toast.error(error.message),
   });
 }

@@ -25,6 +25,16 @@ const MEMBER_STATUS: Record<DriverPoolMember['status'], string> = {
   CANCELLED: 'Cancelled',
 };
 
+/** What the driver needs to know about money for this passenger. */
+function paymentLine(member: DriverPoolMember) {
+  const fare = member.finalFarePoisha ?? member.quotedFarePoisha;
+  if (member.paymentMethod === 'TESLAPAY') return `${formatTaka(fare)} via TeslaPay`;
+  const total = fare + member.duesPoisha;
+  return member.duesPoisha > 0
+    ? `collect ${formatTaka(total)} cash (incl. ${formatTaka(member.duesPoisha)} owed)`
+    : `collect ${formatTaka(total)} cash`;
+}
+
 function SeatMeter({ taken, capacity }: { taken: number; capacity: number }) {
   return (
     <div className="flex items-center gap-2" aria-label={`${taken} of ${capacity} seats taken`}>
@@ -72,9 +82,7 @@ export function PoolCard({ pool }: { pool: DriverPool }) {
                   {member.passengerName} → {member.dropoffZone}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {member.seats} {member.seats === 1 ? 'seat' : 'seats'} ·{' '}
-                  {formatTaka(member.finalFarePoisha ?? member.quotedFarePoisha)}{' '}
-                  {member.paymentMethod === 'CASH' ? 'cash' : 'TeslaPay'}
+                  {member.seats} {member.seats === 1 ? 'seat' : 'seats'} · {paymentLine(member)}
                 </p>
               </div>
               {member.status === 'IN_PROGRESS' ? (
