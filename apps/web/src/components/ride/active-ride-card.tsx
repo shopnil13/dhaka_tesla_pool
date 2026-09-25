@@ -1,6 +1,15 @@
 import type { PassengerRide } from '@teslapool/shared';
+import Link from 'next/link';
+import { AverageRating } from '@/components/star-rating';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { formatKm, formatTaka, ordinal } from '@/lib/format';
 import { rideStage, STAGE_STEPS, stageHeadline } from '@/lib/ride-status';
 import { cn } from '@/lib/utils';
@@ -28,7 +37,7 @@ function StageStepper({ ride }: { ride: PassengerRide }) {
   );
 }
 
-function Detail({ term, children }: { term: string; children: React.ReactNode }) {
+export function Detail({ term, children }: { term: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-0.5">
       <dt className="text-xs text-muted-foreground">{term}</dt>
@@ -37,8 +46,18 @@ function Detail({ term, children }: { term: string; children: React.ReactNode })
   );
 }
 
-/** The passenger's current ride: where it is, what it costs, who is driving. */
-export function ActiveRideCard({ ride }: { ride: PassengerRide }) {
+/**
+ * The passenger's current ride: where it is, what it costs, who is driving.
+ * On the home screen it links to the ride's page (with its timeline); on
+ * that page the link is left out.
+ */
+export function ActiveRideCard({
+  ride,
+  showDetailsLink = true,
+}: {
+  ride: PassengerRide;
+  showDetailsLink?: boolean;
+}) {
   const { pool } = ride;
   const fare = ride.finalFarePoisha ?? ride.quotedFarePoisha;
 
@@ -47,6 +66,16 @@ export function ActiveRideCard({ ride }: { ride: PassengerRide }) {
       <CardHeader>
         <CardDescription>Your ride</CardDescription>
         <CardTitle className="text-xl">{stageHeadline(ride)}</CardTitle>
+        {showDetailsLink && (
+          <CardAction>
+            <Link
+              href={`/passenger/rides/${ride.id}`}
+              className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Timeline
+            </Link>
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent className="grid gap-6">
         <StageStepper ride={ride} />
@@ -67,8 +96,9 @@ export function ActiveRideCard({ ride }: { ride: PassengerRide }) {
         {pool ? (
           <div className="grid gap-3 rounded-lg border p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-medium">
+              <p className="flex flex-wrap items-center gap-x-2 font-medium">
                 {pool.driverName} · {pool.vehicle.name}
+                {pool.driverRating && <AverageRating {...pool.driverRating} />}
               </p>
               <Badge variant="outline">{pool.vehicle.plate}</Badge>
             </div>

@@ -14,3 +14,10 @@ const timeFormat = new Intl.DateTimeFormat('en-GB', {
 });
 /** Timestamps are stored in UTC; riders live in Dhaka. */
 export const formatDhakaTime = (iso: string) => timeFormat.format(new Date(iso));
+
+const clockFormat = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Dhaka',
+  timeStyle: 'short',
+});
+/** Just the Dhaka time of day ("14:05"), for lines under a dated heading. */
+export const formatDhakaClock = (iso: string) => clockFormat.format(new Date(iso));

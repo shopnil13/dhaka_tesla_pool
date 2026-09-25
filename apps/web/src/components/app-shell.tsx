@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 export interface NavItem {
   href: string;
   label: string;
+  /** Also highlight this tab below these paths (e.g. a ride's page under History). */
+  alsoActiveUnder?: string;
 }
 
 function AreaNav({ items }: { items: NavItem[] }) {
@@ -21,7 +23,9 @@ function AreaNav({ items }: { items: NavItem[] }) {
   return (
     <nav className="mx-auto flex max-w-3xl gap-1 px-4" aria-label="Sections">
       {items.map((item) => {
-        const active = pathname === item.href;
+        const active =
+          pathname === item.href ||
+          (item.alsoActiveUnder !== undefined && pathname.startsWith(item.alsoActiveUnder));
         return (
           <Link
             key={item.href}

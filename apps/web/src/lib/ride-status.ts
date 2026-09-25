@@ -1,4 +1,4 @@
-import type { PassengerRide } from '@teslapool/shared';
+import type { PassengerRide, RideStatus } from '@teslapool/shared';
 
 export type RideStage = 'waiting' | 'matched' | 'arrived' | 'riding' | 'completed' | 'cancelled';
 
@@ -43,3 +43,12 @@ export function stageHeadline(ride: PassengerRide): string {
       return 'This ride was cancelled';
   }
 }
+
+/** Short labels for lists, where only the ride's own status is known. */
+export const RIDE_STATUS_LABELS: Record<RideStatus, string> = {
+  REQUESTED: 'Waiting',
+  MATCHED: 'Matched',
+  IN_PROGRESS: 'On the way',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
