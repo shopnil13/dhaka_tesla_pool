@@ -6,6 +6,8 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { requireJsonBody } from './middleware/security';
 import { createAuthRouter } from './modules/auth/auth.routes';
+import { faresRouter } from './modules/fares/fares.routes';
+import { zonesRouter } from './modules/zones/zones.routes';
 import { healthRouter } from './routes/health';
 
 /** Builds the Express app without listening, so tests can drive it with Supertest. */
@@ -23,6 +25,8 @@ export function createApp() {
 
   app.use('/api/v1', healthRouter);
   app.use('/api/v1', createAuthRouter());
+  app.use('/api/v1', zonesRouter);
+  app.use('/api/v1', faresRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
