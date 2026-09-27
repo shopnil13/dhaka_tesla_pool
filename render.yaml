@@ -24,7 +24,7 @@ services:
         value: production
       - key: LOG_LEVEL
         value: info
-      # Neon's direct (non-pooled) connection string, with ?sslmode=require.
+      # Neon's direct (non-pooled) connection string, with ?sslmode=verify-full.
       # Entered in the Render dashboard, never committed.
       - key: DATABASE_URL
         sync: false
