@@ -1,0 +1,298 @@
+<mxfile host="app.diagrams.net" agent="Claude Code" pages="3">
+  <diagram id="architecture" name="Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="B" value="Browser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="W" value="Next.js 16 App Router&lt;br&gt;(Vercel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="180" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="A" value="Express 5 API&lt;br&gt;(Render, Docker)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="640" y="180" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="D" value="PostgreSQL 17&lt;br&gt;(Neon)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="980" y="160" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="S" value="packages/shared" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="380" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="B" target="W">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="rewrite /api/* &amp;rarr; same-origin,&lt;br&gt;first-party session cookie" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="W" target="A">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="Drizzle + node-postgres&lt;br&gt;transactions, row locks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="A" target="D">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="shared types, Zod schemas,&lt;br&gt;fare constants" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=none;startArrow=none;fontSize=11;" edge="1" parent="1" source="W" target="S">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;endArrow=none;startArrow=none;fontSize=11;" edge="1" parent="1" source="A" target="S">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="lifecycles" name="Pool and Ride lifecycles">
+    <mxGraphModel dx="2289" dy="1171" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="poolBox" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Pool (the car&#39;s trip)" vertex="1">
+          <mxGeometry height="440" width="380" x="110" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="pInit" parent="poolBox" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pAccepted" parent="poolBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="ACCEPTED" vertex="1">
+          <mxGeometry height="40" width="220" x="20" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="pArrived" parent="poolBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="DRIVER_ARRIVED" vertex="1">
+          <mxGeometry height="40" width="220" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="pStarted" parent="poolBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="STARTED" vertex="1">
+          <mxGeometry height="40" width="220" x="20" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="pCompleted" parent="poolBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="COMPLETED" vertex="1">
+          <mxGeometry height="40" width="220" x="20" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="pCancelled" parent="poolBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="CANCELLED" vertex="1">
+          <mxGeometry height="40" width="100" x="260" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="pe0" edge="1" parent="poolBox" source="pInit" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pAccepted" value="driver accepts first rider">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pe1" edge="1" parent="poolBox" source="pAccepted" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pArrived" value="at pickup, closes to new riders">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pe2" edge="1" parent="poolBox" source="pArrived" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pStarted" value="fares frozen">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pe3" edge="1" parent="poolBox" source="pStarted" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pCompleted" value="last rider dropped off">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pe4" edge="1" parent="poolBox" source="pAccepted" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pCancelled" value="driver cancels or everyone left">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pe5" edge="1" parent="poolBox" source="pArrived" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="pCancelled" value="driver cancels">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rideBox" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fillColor=#f5f5f5;strokeColor=#666666;" value="Ride (one passenger)" vertex="1">
+          <mxGeometry height="440" width="420" x="640" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="rInit" parent="rideBox" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rRequested" parent="rideBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="REQUESTED" vertex="1">
+          <mxGeometry height="40" width="240" x="20" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="rMatched" parent="rideBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="MATCHED" vertex="1">
+          <mxGeometry height="40" width="240" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rInProgress" parent="rideBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="IN_PROGRESS" vertex="1">
+          <mxGeometry height="40" width="240" x="20" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="rCompleted" parent="rideBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="COMPLETED" vertex="1">
+          <mxGeometry height="40" width="240" x="20" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="rCancelled" parent="rideBox" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="CANCELLED" vertex="1">
+          <mxGeometry height="40" width="100" x="300" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="re0" edge="1" parent="rideBox" source="rInit" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rRequested" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re1" edge="1" parent="rideBox" source="rRequested" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rMatched" value="auto-match or driver accepts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2" edge="1" parent="rideBox" source="rMatched" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rRequested" value="driver cancelled the pool, free">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3" edge="1" parent="rideBox" source="rMatched" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rInProgress" value="trip started">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re4" edge="1" parent="rideBox" source="rInProgress" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rCompleted" value="dropped off and charged">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re5" edge="1" parent="rideBox" source="rRequested" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rCancelled" value="passenger, free">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re6" edge="1" parent="rideBox" source="rMatched" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="rCancelled" value="passenger, &amp;#2547;30 after arrival">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="erd" name="Database ERD">
+    <mxGraphModel grid="0" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="light-dark(#ffffff, #121212)" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="e_users" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;users&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;UK&amp;nbsp;&amp;nbsp;email&amp;nbsp;&amp;nbsp;text&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;role&amp;nbsp;&amp;nbsp;enum &quot;PASSENGER | DRIVER&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;password_hash&amp;nbsp;&amp;nbsp;text &quot;bcrypt&quot;" vertex="1">
+          <mxGeometry height="110" width="260" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_driver_profiles" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;b&gt;driver_profiles&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;user_id&amp;nbsp;&amp;nbsp;uuid" vertex="1">
+          <mxGeometry height="70" width="240" x="400" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_vehicles" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;vehicles&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK,UK&amp;nbsp;&amp;nbsp;driver_id&amp;nbsp;&amp;nbsp;uuid &quot;one Tesla per driver&quot;&lt;br&gt;UK&amp;nbsp;&amp;nbsp;plate&amp;nbsp;&amp;nbsp;text&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;capacity&amp;nbsp;&amp;nbsp;smallint &quot;CHECK 1-6&quot;" vertex="1">
+          <mxGeometry height="110" width="280" x="660" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_wallet_accounts" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;wallet_accounts&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK,FK&amp;nbsp;&amp;nbsp;user_id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;balance_poisha&amp;nbsp;&amp;nbsp;int &quot;CHECK &amp;gt;= 0&quot;" vertex="1">
+          <mxGeometry height="70" width="280" x="1000" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_zones" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;b&gt;zones&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;name&amp;nbsp;&amp;nbsp;text &quot;9 predefined Dhaka zones&quot;" vertex="1">
+          <mxGeometry height="70" width="260" x="40" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="e_zone_distances" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;" value="&lt;b&gt;zone_distances&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK,FK&amp;nbsp;&amp;nbsp;from_zone_id&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;PK,FK&amp;nbsp;&amp;nbsp;to_zone_id&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;distance_m&amp;nbsp;&amp;nbsp;int &quot;CHECK &amp;gt; 0&quot;" vertex="1">
+          <mxGeometry height="90" width="280" x="360" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ride_requests" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;ride_requests&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;passenger_id&amp;nbsp;&amp;nbsp;uuid &quot;partial UNIQUE while active&quot;&lt;br&gt;FK&amp;nbsp;&amp;nbsp;pickup_zone_id&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;FK&amp;nbsp;&amp;nbsp;dropoff_zone_id&amp;nbsp;&amp;nbsp;smallint &quot;CHECK &amp;lt;&amp;gt; pickup&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;seats&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;wants_share&amp;nbsp;&amp;nbsp;bool&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;payment_method&amp;nbsp;&amp;nbsp;enum &quot;CASH | TESLAPAY&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;status&amp;nbsp;&amp;nbsp;enum &quot;REQUESTED..COMPLETED | CANCELLED&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;quoted_fare_poisha&amp;nbsp;&amp;nbsp;int&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;final_fare_poisha&amp;nbsp;&amp;nbsp;int &quot;CHECK &amp;lt;= quoted&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;fare_breakdown&amp;nbsp;&amp;nbsp;jsonb &quot;frozen at start&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;cancellation_fee_poisha&amp;nbsp;&amp;nbsp;int" vertex="1">
+          <mxGeometry height="270" width="360" x="720" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pools" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;pools&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;driver_id&amp;nbsp;&amp;nbsp;uuid &quot;partial UNIQUE while active&quot;&lt;br&gt;FK&amp;nbsp;&amp;nbsp;vehicle_id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;pickup_zone_id&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;is_shared&amp;nbsp;&amp;nbsp;bool&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;capacity&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;seats_taken&amp;nbsp;&amp;nbsp;smallint &quot;CHECK 0..capacity&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;status&amp;nbsp;&amp;nbsp;enum &quot;ACCEPTED..COMPLETED | CANCELLED&quot;" vertex="1">
+          <mxGeometry height="190" width="320" x="1140" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pool_memberships" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;pool_memberships&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;pool_id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;ride_request_id&amp;nbsp;&amp;nbsp;uuid &quot;partial UNIQUE while not left&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;seats&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;dropoff_order&amp;nbsp;&amp;nbsp;smallint&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;left_at&amp;nbsp;&amp;nbsp;timestamptz&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;left_reason&amp;nbsp;&amp;nbsp;enum &quot;PASSENGER_ | DRIVER_CANCELLED&quot;" vertex="1">
+          <mxGeometry height="170" width="320" x="1140" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ride_events" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;ride_events&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;bigint&lt;br&gt;FK&amp;nbsp;&amp;nbsp;pool_id&amp;nbsp;&amp;nbsp;uuid &quot;exactly one of pool / ride&quot;&lt;br&gt;FK&amp;nbsp;&amp;nbsp;ride_request_id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;from_status&amp;nbsp;&amp;nbsp;text&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;to_status&amp;nbsp;&amp;nbsp;text&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;actor_role&amp;nbsp;&amp;nbsp;enum &quot;PASSENGER | DRIVER | SYSTEM&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;metadata&amp;nbsp;&amp;nbsp;jsonb" vertex="1">
+          <mxGeometry height="170" width="320" x="720" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="e_payments" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;payments&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;FK&amp;nbsp;&amp;nbsp;ride_request_id&amp;nbsp;&amp;nbsp;uuid &quot;UNIQUE with purpose&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;purpose&amp;nbsp;&amp;nbsp;enum &quot;FARE | CANCELLATION_FEE&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;status&amp;nbsp;&amp;nbsp;enum &quot;DUE | PAID&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;amount_poisha&amp;nbsp;&amp;nbsp;int &quot;CHECK &amp;gt; 0&quot;" vertex="1">
+          <mxGeometry height="130" width="300" x="360" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="e_wallet_transactions" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;wallet_transactions&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK&amp;nbsp;&amp;nbsp;id&amp;nbsp;&amp;nbsp;bigint&lt;br&gt;FK,UK&amp;nbsp;&amp;nbsp;payment_id&amp;nbsp;&amp;nbsp;uuid &quot;debited once&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;type&amp;nbsp;&amp;nbsp;enum &quot;TOPUP | DEBIT&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;amount_poisha&amp;nbsp;&amp;nbsp;int&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;balance_after_poisha&amp;nbsp;&amp;nbsp;int" vertex="1">
+          <mxGeometry height="130" width="300" x="1000" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ratings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;ratings&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;PK,FK&amp;nbsp;&amp;nbsp;ride_request_id&amp;nbsp;&amp;nbsp;uuid &quot;one per ride&quot;&lt;br&gt;FK&amp;nbsp;&amp;nbsp;driver_id&amp;nbsp;&amp;nbsp;uuid&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;stars&amp;nbsp;&amp;nbsp;smallint &quot;CHECK 1-5&quot;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;comment&amp;nbsp;&amp;nbsp;text &quot;&amp;lt;= 280 chars&quot;" vertex="1">
+          <mxGeometry height="110" width="300" x="360" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="er1" edge="1" parent="1" source="e_users" style="edgeStyle=entityRelationEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToOne;endFill=0;" target="e_driver_profiles" value="is (driver)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er2" edge="1" parent="1" source="e_users" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToOne;endFill=0;" target="e_vehicles" value="drives">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="20" />
+              <mxPoint x="800" y="20" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er3" edge="1" parent="1" source="e_users" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToOne;endFill=0;" target="e_wallet_accounts" value="owns">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="170" />
+              <mxPoint x="1140" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er4" edge="1" parent="1" source="e_users" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_ride_requests" value="requests">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er5" edge="1" parent="1" source="e_users" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_pools" value="drives">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="200" />
+              <mxPoint x="1300" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er6" edge="1" parent="1" source="e_zones" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_zone_distances" value="from / to">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="430" />
+              <mxPoint x="500" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er7" edge="1" parent="1" source="e_zones" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_ride_requests" value="pickup / drop-off">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er8" edge="1" parent="1" source="e_zones" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_pools" value="pickup">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="540" />
+              <mxPoint x="1300" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er9" edge="1" parent="1" source="e_vehicles" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_pools" value="used in">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1300" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er10" edge="1" parent="1" source="e_pools" style="edgeStyle=entityRelationEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_pool_memberships" value="seats">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er11" edge="1" parent="1" source="e_ride_requests" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_pool_memberships" value="rides in">
+          <mxGeometry relative="1" x="-0.4805" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1100" y="380" />
+              <mxPoint x="1100" y="685" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er12" edge="1" parent="1" source="e_pools" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_ride_events" value="audit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1300" y="520" />
+              <mxPoint x="860" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er13" edge="1" parent="1" source="e_ride_requests" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_ride_events" value="audit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1010" y="555" />
+              <mxPoint x="860" y="555" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er14" edge="1" parent="1" source="e_ride_requests" style="edgeStyle=entityRelationEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" target="e_payments" value="paid by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="er15" edge="1" parent="1" source="e_payments" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToOne;endFill=0;" target="e_wallet_transactions" value="debited as">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="510" y="800" />
+              <mxPoint x="830" y="800" />
+              <mxPoint x="830" y="905" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er16" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;" value="ledger">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1530" y="80" />
+              <mxPoint x="1530" y="910" />
+            </Array>
+            <mxPoint x="1260" y="80" as="sourcePoint" />
+            <mxPoint x="1280" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="er17" edge="1" parent="1" source="e_ride_requests" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;startArrow=ERone;startFill=0;endArrow=ERzeroToOne;endFill=0;" target="e_ratings" value="rated by">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="460" />
+              <mxPoint x="310" y="895" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
