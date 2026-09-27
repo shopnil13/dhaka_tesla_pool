@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master, pre-release, 'release/**']
+  pull_request:
+    branches: [master, pre-release, 'release/**']
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck, lint, format, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # A real Postgres, like local development: the tests rely on row locks,
+    # CHECK constraints and partial unique indexes.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: teslapool
+          POSTGRES_PASSWORD: teslapool
+          POSTGRES_DB: teslapool_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U teslapool -d teslapool_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The integration tests truncate this database (its name must end in _test).
+      DATABASE_URL_TEST: postgres://teslapool:teslapool@localhost:5432/teslapool_test
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # typecheck → lint → prettier --check → API tests (migrates the test DB first)
+      - run: npm run verify
+
+      - run: npm run build

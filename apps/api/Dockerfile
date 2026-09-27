@@ -30,6 +30,8 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=prod-deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY apps/api/package.json ./apps/api/
 COPY apps/api/migrations ./apps/api/migrations
+# Start script for hosts without a separate migrate step (Render): migrate, seed, serve.
+COPY --chmod=755 apps/api/start.sh ./apps/api/
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 WORKDIR /app/apps/api
 USER node
