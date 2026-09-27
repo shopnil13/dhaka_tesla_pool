@@ -12,7 +12,9 @@ services:
     dockerfilePath: ./apps/api/Dockerfile
     # Pre-deploy commands are paid-only, so migrations and the (idempotent)
     # seed run on every container start, including each wake from sleep.
-    dockerCommand: sh -c "node dist/migrate.js && node dist/seed.js && node dist/server.js"
+    # A script rather than an inline `sh -c "…"`: Render passes the Docker
+    # Command without shell parsing, so the quotes reached sh literally.
+    dockerCommand: ./start.sh
     # Pings the database too, so a deploy with a broken DATABASE_URL never goes live.
     healthCheckPath: /api/v1/health
     # Deploy a new commit only once its GitHub checks (the CI workflow) pass.
