@@ -545,8 +545,8 @@ ledger integrity, payments at drop-off, timeline wording and privacy, driver
 history and earnings, and the seeded demo history. **CI**
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs `verify` and the
 production build against a Postgres 17 service on every push and pull request
-to `master`, `pre-release` and `release/**`; Render deploys only commits whose
-checks pass. The UI is checked end to end by the screenshot script (not in CI).
+to `master`, `pre-release` and `release/**`. The UI is checked end to end by
+the screenshot script (not in CI).
 
 ## 12. API overview
 
@@ -579,11 +579,11 @@ entry.
 
 ## 13. Deployment
 
-| Part     | Where                                           | Notes                                                                                                                                                                                                                                                 |
-| -------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Web      | **Vercel** (Hobby, free)                        | Root directory `apps/web`; env `API_URL` = the Render URL; `/api/*` is proxied, so the cookie stays first-party                                                                                                                                       |
-| API      | **Render** free web service (Docker, Singapore) | Defined in [`render.yaml`](render.yaml). Pre-deploy commands are paid-only, so [`start.sh`](apps/api/start.sh) runs migrations and the idempotent seed before the server on every start. Health check pings the database. Deploys wait for CI to pass |
-| Database | **Neon** free Postgres (Singapore)              | Direct connection with `sslmode=verify-full`; does not expire (Render's free Postgres would be deleted after 30 days)                                                                                                                                 |
+| Part     | Where                                           | Notes                                                                                                                                                                                                                                                                                                                    |
+| -------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Web      | **Vercel** (Hobby, free)                        | Root directory `apps/web`; env `API_URL` = the Render URL; `/api/*` is proxied, so the cookie stays first-party                                                                                                                                                                                                          |
+| API      | **Render** free web service (Docker, Singapore) | Defined in [`render.yaml`](render.yaml). Pre-deploy commands are paid-only, so [`start.sh`](apps/api/start.sh) runs migrations and the idempotent seed before the server on every start. Health check pings the database, so a broken deploy never replaces the live one. Redeploys on every commit to the deploy branch |
+| Database | **Neon** free Postgres (Singapore)              | Direct connection with `sslmode=verify-full`; does not expire (Render's free Postgres would be deleted after 30 days)                                                                                                                                                                                                    |
 
 **Free-tier behaviour:** Render sleeps the API after 15 idle minutes; the next
 request waits ~1 minute (Vercel's proxy allows 120 s, so it doesn't fail) and

@@ -17,8 +17,9 @@ services:
     dockerCommand: ./start.sh
     # Pings the database too, so a deploy with a broken DATABASE_URL never goes live.
     healthCheckPath: /api/v1/health
-    # Deploy a new commit only once its GitHub checks (the CI workflow) pass.
-    autoDeployTrigger: checksPass
+    # Redeploy on every commit to the deploy branch. `checksPass` (wait for CI)
+    # never fired: Render did not pick up the GitHub Actions results.
+    autoDeployTrigger: commit
     envVars:
       - key: NODE_ENV
         value: production
