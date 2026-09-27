@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
+import { SlowServerNotice } from '@/components/slow-server-notice';
 import { Toaster } from '@/components/ui/sonner';
 import { ApiError } from '@/lib/api';
 
@@ -18,6 +19,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <SlowServerNotice />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
