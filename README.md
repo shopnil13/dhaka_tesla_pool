@@ -8,12 +8,12 @@ A ride-pooling MVP. Passengers going the same way share one three-seat Tesla
 (Jashim's _Bullet_), each pays their own upfront fare, and the seat count holds
 even when two people grab the last seat at the same instant.
 
-|               |                                                               |
-| ------------- | ------------------------------------------------------------- |
-| **Live demo** | **https://dhaka-tesla-pool-shopnil.vercel.app**               |
-| API health    | https://dhaka-tesla-pool-api-iw7d.onrender.com/api/v1/health  |
-| Demo video    | _link added after recording_                                  |
-| Stack         | Next.js 16 · Express 5 · PostgreSQL 17 · Drizzle · TypeScript |
+|                |                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Live demo**  | **https://dhaka-tesla-pool-shopnil.vercel.app**                                                                       |
+| API health     | https://dhaka-tesla-pool-api-iw7d.onrender.com/api/v1/health                                                          |
+| **Demo video** | **[Watch the video walkthrough](https://drive.google.com/file/d/13GX9mx3ElGCZwbaZhBI3jI3dK1D_9zb5/view?usp=sharing)** |
+| Stack          | Next.js 16 · Express 5 · PostgreSQL 17 · Drizzle · TypeScript                                                         |
 
 > **First visit may take up to a minute.** The API runs on Render's free tier
 > and sleeps after 15 idle minutes; the app shows "Waking up Bullet's engine…"
@@ -23,8 +23,8 @@ even when two people grab the last seat at the same instant.
 
 | Who    | Email                   | Role      | Notes                                                     |
 | ------ | ----------------------- | --------- | --------------------------------------------------------- |
-| Nusrat | `nusrat@teslapool.test` | Passenger | TeslaPay ৳500 (৳428 after yesterday's seeded ride)        |
-| Rafiq  | `rafiq@teslapool.test`  | Passenger | ৳300; yesterday's ride is waiting for his rating          |
+| Nusrat | `nusrat@teslapool.test` | Passenger | TeslaPay ৳500                                             |
+| Rafiq  | `rafiq@teslapool.test`  | Passenger | TeslaPay ৳300                                             |
 | Shirin | `shirin@teslapool.test` | Passenger | Only ৳50, so a ৳72 TeslaPay ride is refused (cash works)  |
 | Jashim | `jashim@teslapool.test` | Driver    | Drives Bullet `DHAKA-TESLA-11`, 3 seats, parked at Banani |
 
